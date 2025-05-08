@@ -1,0 +1,19 @@
+# Ignorar dependências do Node.js
+node_modules/
+backend/node_modules/
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar variáveis de ambiente
+.env
+backend/.env
+
+# Ignorar arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar lockfiles na raiz (caso frontend separado)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
