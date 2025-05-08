@@ -4,11 +4,27 @@ const logger = require('../utils/logger');
 class TecnicosService {
   async getAll() {
     try {
-      const [rows] = await db.query('SELECT * FROM tecnicos WHERE ativo = 1 ORDER BY nome');
-      return rows;
-    } catch (error) {
-      logger.error('Erro ao buscar técnicos', { error });
-      throw new Error('Não foi possível carregar os técnicos');
+      logger.info('Iniciando busca de técnicos');
+      const connection = await db.getConnection();
+      try {
+        const [rows] = await connection.query('SELECT * FROM tecnicos WHERE ativo = 1 ORDER BY nome');
+        logger.info(`Técnicos encontrados: ${rows.length}`);
+        return rows;
+      } catch (queryError) {
+        logger.error('Erro na query de técnicos', { 
+          errorMessage: queryError.message, 
+          sqlState: queryError.sqlState, 
+          errorCode: queryError.errno 
+        });
+        throw new Error(`Erro na consulta: ${queryError.message}`);
+      } finally {
+        connection.release();
+      }
+    } catch (connectionError) {
+      logger.error('Erro de conexão ao buscar técnicos', { 
+        errorMessage: connectionError.message 
+      });
+      throw new Error('Falha na conexão com o banco de dados');
     }
   }
 

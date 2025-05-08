@@ -4,11 +4,27 @@ const logger = require('../utils/logger');
 class TiposIntervencaoService {
   async getAll() {
     try {
-      const [rows] = await db.query('SELECT * FROM tipos_intervencao WHERE ativo = 1 ORDER BY nome');
-      return rows;
-    } catch (error) {
-      logger.error('Erro ao buscar tipos de intervenção', { error });
-      throw new Error('Não foi possível carregar os tipos de intervenção');
+      logger.info('Iniciando busca de tipos de intervenção');
+      const connection = await db.getConnection();
+      try {
+        const [rows] = await connection.query('SELECT * FROM tipos_intervencao WHERE ativo = 1 ORDER BY nome');
+        logger.info(`Tipos de intervenção encontrados: ${rows.length}`);
+        return rows;
+      } catch (queryError) {
+        logger.error('Erro na query de tipos de intervenção', { 
+          errorMessage: queryError.message, 
+          sqlState: queryError.sqlState, 
+          errorCode: queryError.errno 
+        });
+        throw new Error(`Erro na consulta: ${queryError.message}`);
+      } finally {
+        connection.release();
+      }
+    } catch (connectionError) {
+      logger.error('Erro de conexão ao buscar tipos de intervenção', { 
+        errorMessage: connectionError.message 
+      });
+      throw new Error('Falha na conexão com o banco de dados');
     }
   }
 
