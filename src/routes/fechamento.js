@@ -1,31 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const fechamentoController = require('../controllers/fechamentoController');
-// const { create, update } = require('../validators/fechamentoValidator'); // Pode não ser necessário para "fechar"
-const { param } = require('express-validator'); // Para validar o parâmetro da rota
-const auth = require('../middleware/auth');
+const auth = require('../middleware/auth'); 
+const { param, body } = require('express-validator'); 
 
-// Rota original, manter se ainda for usada para CRUD completo de 'fechamentos'
-// router.post('/', auth, create, fechamentoController.create);
-// ... outras rotas CRUD ...
+router.post('/', auth, [
+    body('propostaId').notEmpty().withMessage('ID da proposta é obrigatório'),
+], fechamentoController.create);
 
-// Nova rota para a ação de fechar um processo por seu número/identificador
 router.put(
-  '/:numeroProcesso/close', // Ex: /api/fechamento/PROCESSO123/close
+  '/:numeroProcesso/close',
   auth,
-  [
-    param('numeroProcesso').notEmpty().withMessage('Número do processo é obrigatório.').trim().escape(),
-  ],
-  fechamentoController.closeProcessByNumber // Nova função no controller
+  [param('numeroProcesso').notEmpty().withMessage('Número do processo é obrigatório.').trim().escape()],
+  fechamentoController.closeProcessByNumber
+);
+router.post(
+    '/close-by-number', 
+    auth,
+    [body('numeroProcesso').notEmpty().withMessage('Número do processo é obrigatório.')],
+    (req, res, next) => { 
+        req.params = { numeroProcesso: req.body.numeroProcesso }; 
+        fechamentoController.closeProcessByNumber(req, res, next);
+    }
 );
 
-// Se você quiser manter o POST /api/fechamento para essa ação:
-// router.post('/close', auth, [body('numeroProcesso').notEmpty()], fechamentoController.closeProcessByNumberFromPOST);
 
-
-// Manter as rotas de consulta se necessárias
-router.get('/', auth, fechamentoController.getAll);
-router.get('/filter', auth, fechamentoController.filter); // Se existir
-router.get('/:id', auth, fechamentoController.getById);   // Se for ID numérico
+router.get('/', auth, fechamentoController.findAll);
+router.get('/:id', auth, fechamentoController.findOne); 
 
 module.exports = router;

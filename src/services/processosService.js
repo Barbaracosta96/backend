@@ -1,61 +1,47 @@
-const pool = require('../db/connection');
+const pool = require('../db/connection'); 
+const logger = require('../utils/logger');
+
+const mapToDbModel = (dataFromFrontend) => {
+    return {
+        cliente_nome: dataFromFrontend.client,
+        tipo_intervencao_id: dataFromFrontend.tipoIntervencao,
+        descricao_processo: dataFromFrontend.descricao,
+        local_processo: dataFromFrontend.local,
+        numero_proposta_origem: dataFromFrontend.proposalNumber,
+        tecnico_id: dataFromFrontend.tecnico,
+        data_adjudicacao_proposta: dataFromFrontend.adjudicationDate,
+        status_processo: dataFromFrontend.status,
+        data_abertura_efetiva: dataFromFrontend.dataAbertura
+    };
+};
+
+const mapToFrontendModel = (dataFromDb) => {
+    if (!dataFromDb) return null;
+    return {
+        id: dataFromDb.id, 
+        client: dataFromDb.cliente_nome,
+        tipoIntervencao: dataFromDb.tipo_intervencao_id,
+        descricao: dataFromDb.descricao_processo,
+        local: dataFromDb.local_processo,
+        proposalNumber: dataFromDb.numero_proposta_origem,
+        tecnico: dataFromDb.tecnico_id,
+        adjudicationDate: dataFromDb.data_adjudicacao_proposta,
+        status: dataFromDb.status_processo,
+        dataAbertura: dataFromDb.data_abertura_efetiva,
+        numero: dataFromDb.id, 
+    };
+};
 
 module.exports = {
-  async getAll() { 
-    // Mapear colunas do DB para camelCase no retorno se necessário
-    const [rows] = await pool.query('SELECT PROPOSTA as proposta, NOM_CLI as nomeCliente, DATAPROP as dataAdjudicacao, VALOR as valor, ESTADO as estado, id FROM abrobra'); // Ajuste a query e tabela
-    return rows; 
-  },
-  async getById(id) { 
-    // Ajuste a query e tabela, e o mapeamento de retorno
-    const [rows] = await pool.query('SELECT PROPOSTA as proposta, NOM_CLI as nomeCliente, DATAPROP as dataAdjudicacao, VALOR as valor, ESTADO as estado, id FROM abrobra WHERE id = ?', [id]); 
-    return rows[0]; 
-  },
-  // ... filter ...
-
   async create(data) {
-    // `data` aqui já vem com os nomes do validador (proposta, nomeCliente, etc.)
-    // Mapear para os nomes das colunas do banco de dados (SNAKE_CASE_UPPER)
-    const dbData = {
-      PROPOSTA: data.proposta,
-      VERSAO: data.versao, // Adicionar coluna VERSAO na tabela se necessário
-      ANO: data.ano,       // Adicionar coluna ANO na tabela se necessário
-      NOM_CLI: data.nomeCliente,
-      DATAPROP: data.dataAdjudicacao, // Ou DATA_ADJUDICACAO
-      VALOR: data.valor,
-      ESTADO: data.estado,
-      // Adicionar outros campos se a tabela 'abrobra' (ou 'processos') os tiver
-      // Ex: DES_OBR, LOC_OBR, etc., se vierem de outro formulário, precisarão ser incluídos ou ter default
-    };
-
-    // Remover chaves com valor undefined para não dar erro no INSERT
-    Object.keys(dbData).forEach(key => dbData[key] === undefined && delete dbData[key]);
-
-
-    // Supondo que a tabela é 'abrobra' e tem estas colunas
-    const [result] = await pool.query('INSERT INTO abrobra SET ?', [dbData]);
-    
-    // Retornar o objeto criado com o ID e os dados como foram recebidos (camelCase)
+    const dbData = mapToDbModel(data);
+    const [result] = await pool.query('INSERT INTO processos SET ?', [dbData]);
+    logger.info('ProcessosService: Novo processo inserido no banco', { id: result.insertId });
     return { id: result.insertId, ...data }; 
   },
-  async update(id, data) { 
-    const dbData = {
-      PROPOSTA: data.proposta,
-      VERSAO: data.versao,
-      ANO: data.ano,
-      NOM_CLI: data.nomeCliente,
-      DATAPROP: data.dataAdjudicacao,
-      VALOR: data.valor,
-      ESTADO: data.estado,
-    };
-    Object.keys(dbData).forEach(key => dbData[key] === undefined && delete dbData[key]);
 
-    const [result] = await pool.query('UPDATE abrobra SET ? WHERE id = ?', [dbData, id]);
-    if (result.affectedRows === 0) return null;
-    return { id, ...data }; 
-  },
-  async remove(id) { 
-    await pool.query('DELETE FROM abrobra WHERE id = ?', [id]); 
-    return { id }; 
+  async getById(id) {
+    const [rows] = await pool.query('SELECT * FROM processos WHERE id = ?', [id]);
+    return mapToFrontendModel(rows[0]);
   }
 };

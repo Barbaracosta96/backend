@@ -1,58 +1,27 @@
-const service = require('../services/trabalhoRealizadoService');
-const { validationResult } = require('express-validator');
-
-// ... (função validarTrabalho) ...
-
-exports.getAll = async (req, res, next) => {
-  try {
-    // Passar req.query para o service para filtrar
-    // O frontend envia 'numeroProcesso', o service pode esperar 'PROPOSTA' ou 'numeroProcesso'
-    const filters = {};
-    if (req.query.numeroProcesso) {
-      filters.proposta = req.query.numeroProcesso; // Mapeia para o nome que o service espera
-    }
-    // Adicione outros filtros de req.query se necessário
-
-    const rows = await service.getAll(filters); // Modificar service para aceitar filtros
-    res.json(rows);
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.getById = async (req, res, next) => {
-  try {
-    const row = await service.getById(req.params.id);
-    if (!row) return res.status(404).json({ error: 'Não encontrado' });
-    res.json(row);
-  } catch (error) {
-    next(error);
-  }
-};
-
 exports.create = async (req, res, next) => {
   try {
-    const result = await service.create(req.body);
-    res.status(201).json(result);
+    const propostaId = req.params.propostaId || req.body.propostaId; // propostaId vindo da URL ou corpo
+    if (!propostaId) {
+        logger.warn('TrabalhoRealizadoController: propostaId não fornecido.');
+        return res.status(400).json({ error: 'ID da Proposta é obrigatório.' });
+    }
+    
+    const { dataInicio, dataFim, horasRealizadas, descricaoTrabalho, observacoes } = req.body;
+    const trabalhoData = {
+        proposta_id: propostaId,
+        data_inicio: dataInicio,
+        data_fim: dataFim,
+        horas_realizadas: horasRealizadas,
+        descricao_trabalho: descricaoTrabalho,
+        observacoes_trabalho: observacoes
+    };
+    
+    logger.info(`TrabalhoRealizadoController: Criando trabalho realizado para proposta ID: ${propostaId}`, trabalhoData);
+    const createdTrabalho = await service.create(trabalhoData);
+    logger.info('TrabalhoRealizadoController: Trabalho realizado criado:', createdTrabalho);
+    res.status(201).json(createdTrabalho);
   } catch (error) {
-    next(error);
-  }
-};
-
-exports.update = async (req, res, next) => {
-  try {
-    const result = await service.update(req.params.id, req.body);
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.remove = async (req, res, next) => {
-  try {
-    await service.remove(req.params.id);
-    res.status(204).end();
-  } catch (error) {
+    logger.error('TrabalhoRealizadoController: Erro ao criar trabalho realizado:', error);
     next(error);
   }
 };

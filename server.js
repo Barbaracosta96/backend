@@ -1,8 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { sequelize } = require('./src/models');
-const routes = require('./src/routes');
+const { sequelize } = require('./models');
+const routes = require('./routes');
 
 const app = express();
 
@@ -49,20 +49,6 @@ app.use((err, req, res, next) => {
 });
 
 let PORT = process.env.PORT || 3001;
-
-// Sincronizar modelos com o banco de dados
-sequelize.sync({ alter: true })
-  .then(() => {
-    console.log('Modelos sincronizados com sucesso');
-    
-    // Iniciar o servidor
-    app.listen(PORT, () => {
-      console.log(`Servidor rodando na porta ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.error('Erro ao sincronizar modelos:', error);
-  });
 const MAX_PORT = 3010; // Limite máximo de tentativas
 
 async function startServer() {
