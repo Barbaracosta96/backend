@@ -7,7 +7,7 @@ class TecnicosService {
       logger.info('Iniciando busca de técnicos');
       const connection = await db.getConnection();
       try {
-        const [rows] = await connection.query('SELECT * FROM tecnicos WHERE ativo = 1 ORDER BY nome');
+        const [rows] = await connection.query('SELECT * FROM tecnico WHERE ativo = 1 ORDER BY nome');
         logger.info(`Técnicos encontrados: ${rows.length}`);
         return rows;
       } catch (queryError) {

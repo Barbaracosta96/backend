@@ -7,7 +7,7 @@ class TiposIntervencaoService {
       logger.info('Iniciando busca de tipos de intervenção');
       const connection = await db.getConnection();
       try {
-        const [rows] = await connection.query('SELECT * FROM tipos_intervencao WHERE ativo = 1 ORDER BY nome');
+        const [rows] = await connection.query('SELECT * FROM tipointervencao WHERE ativo = 1 ORDER BY nome');
         logger.info(`Tipos de intervenção encontrados: ${rows.length}`);
         return rows;
       } catch (queryError) {
