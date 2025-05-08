@@ -11,7 +11,11 @@ const errorHandler = require('./middleware/errorHandler');
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(express.json());
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3000' })); // Fallback para dev
+app.use(cors({ 
+  origin: process.env.CORS_ORIGIN || '*', // Permitir todas as origens em desenvolvimento
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+})); // Configuração de CORS mais permissiva
 
 // Rota específica para favicon
 app.get('/favicon.ico', (req, res) => {
