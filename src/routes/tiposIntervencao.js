@@ -1,5 +1,4 @@
 const express = require('express');
-const express = require('express');
 const router = express.Router();
 const tiposIntervencaoController = require('../controllers/tiposIntervencaoController');
 const { validateTipoIntervencao } = require('../middleware/validations');

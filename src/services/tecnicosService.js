@@ -1,5 +1,4 @@
 const db = require('../db/connection');
-const db = require('../db/connection');
 const logger = require('../utils/logger');
 
 class TecnicosService {

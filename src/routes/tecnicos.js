@@ -1,5 +1,4 @@
 const express = require('express');
-const express = require('express');
 const router = express.Router();
 const tecnicosController = require('../controllers/tecnicosController');
 const { validateTecnico } = require('../middleware/validations');

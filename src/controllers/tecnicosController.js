@@ -1,5 +1,4 @@
 const tecnicosService = require('../services/tecnicosService');
-const tecnicosService = require('../services/tecnicosService');
 const logger = require('../utils/logger');
 
 exports.getAll = async (req, res) => {

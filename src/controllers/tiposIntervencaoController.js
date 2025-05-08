@@ -1,6 +1,4 @@
 const tiposIntervencaoService = require('../services/tiposIntervencaoService');
-
-const tiposIntervencaoService = require('../services/tiposIntervencaoService');
 const logger = require('../utils/logger');
 
 exports.getAll = async (req, res) => {
